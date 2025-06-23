@@ -109,11 +109,49 @@ public class Model extends Observable {
     public boolean tilt(Side side) {
         boolean changed;
         changed = false;
-
+        board.setViewingPerspective(side);
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
         // changed local variable to true.
-
+        boolean[][] isMerged = new boolean[board.size()][board.size()];
+        for(int row = board.size() -2; row >= 0; row--)
+        {
+            for(int column = 0; column < board.size(); column++)
+            {
+                boolean NoMoreMerge = false;
+                int currentRow = row;
+                while(!NoMoreMerge)
+                {
+                    int nextRow = currentRow+1;
+                    //Move the tile
+                    if((nextRow < board.size() && board.tile(column,currentRow) != null && board.tile(column,nextRow) == null)
+                     || ((nextRow < board.size() && board.tile(column, currentRow) != null && board.tile(column,nextRow) != null && board.tile(column,currentRow).value() == board.tile(column, nextRow).value())))
+                    {
+                        while(nextRow < board.size()-1 && board.tile(column,(nextRow)) == null )
+                        {
+                            nextRow++;
+                        }
+                        nextRow--;
+                        boolean ifMerged = false;
+                        if(!isMerged[nextRow][column])
+                        {
+                             ifMerged = board.move(column, nextRow, board.tile(column, currentRow));
+                        }
+                        if(ifMerged)
+                        {
+                            isMerged[nextRow][column] = true;
+                            score += board.tile(column, nextRow).value();
+                        }
+                        currentRow = nextRow;
+                        changed = true;
+                    }
+                    else{
+                        NoMoreMerge = true;
+                    }
+                }
+            }
+        }
+        board.setViewingPerspective(Side.NORTH);
         checkGameOver();
         if (changed) {
             setChanged();
@@ -127,6 +165,7 @@ public class Model extends Observable {
     private void checkGameOver() {
         gameOver = checkGameOver(board);
     }
+    /** Move all tiles to the appropriate position */
 
     /** Determine whether game is over. */
     private static boolean checkGameOver(Board b) {
@@ -138,6 +177,16 @@ public class Model extends Observable {
      * */
     public static boolean emptySpaceExists(Board b) {
         // TODO: Fill in this function.
+        for(int i = 0; i < b.size(); i++)
+        {
+            for(int j = 0; j < b.size(); j++)
+            {
+                if(b.tile(j,i) == null)
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -148,6 +197,16 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+        for(int row = 0; row < b.size(); row++)
+        {
+            for(int column = 0; column < b.size(); column++)
+            {
+                if(b.tile(column,row) != null && b.tile(column, row).value() == MAX_PIECE)
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -159,6 +218,23 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
+        if(emptySpaceExists(b))
+            return true;
+        for(int row = 0; row < b.size(); row++)
+        {
+            for(int column = 0; column < b.size(); column++)
+            {
+                if((row+1) < b.size() && b.tile(column, row).value() == b.tile(column, (row + 1)).value())
+                {
+                    return true;
+                }
+
+                if((column+1) < b.size() && b.tile(column,row).value() == b.tile((column+1),row).value())
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
