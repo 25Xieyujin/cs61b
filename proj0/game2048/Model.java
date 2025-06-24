@@ -127,11 +127,17 @@ public class Model extends Observable {
                     if((nextRow < board.size() && board.tile(column,currentRow) != null && board.tile(column,nextRow) == null)
                      || ((nextRow < board.size() && board.tile(column, currentRow) != null && board.tile(column,nextRow) != null && board.tile(column,currentRow).value() == board.tile(column, nextRow).value())))
                     {
-                        while(nextRow < board.size()-1 && board.tile(column,(nextRow)) == null )
+                        while(nextRow <= board.size()-2)
                         {
-                            nextRow++;
+                            if(board.tile(column,(nextRow+1)) == null )
+                            {
+                                nextRow++;
+                            }
+                            else {
+                                break;
+                            }
+
                         }
-                        nextRow--;
                         boolean ifMerged = false;
                         if(!isMerged[nextRow][column])
                         {
